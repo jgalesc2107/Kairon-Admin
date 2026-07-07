@@ -17,6 +17,7 @@ interface RegistrationSession {
     supervisor?: string;
     aprobados?: string;
     suspendidos?: string;
+    descripcionGeneral?: string;
     fotoBuffer?: Buffer;
     fotoName?: string;
     fotoUrl?: string;
@@ -34,6 +35,7 @@ const QUESTIONS = [
   "Por favor escribe el nombre del **Supervisor** (si no hay, escribe `N/A`):",
   "Por favor escribe los **Aprobados** (separados por coma si son varios):",
   "Por favor escribe los **Suspendidos** (si no hay, escribe `N/A`):",
+  "Por favor escribe una **Descripción General** del evento:",
   "📎 Por favor adjunta la **Foto de Puntos** (envía el archivo o imagen):",
 ];
 
@@ -116,8 +118,8 @@ export async function handleRegistrationMessage(
 
   const { step, answers } = session;
 
-  if (step < 6) {
-    // Text-based answers (steps 0–5)
+  if (step < 7) {
+    // Text-based answers (steps 0–6)
     switch (step) {
       case 0:
         answers.eventoNombre = content;
@@ -137,6 +139,9 @@ export async function handleRegistrationMessage(
       case 5:
         answers.suspendidos = content;
         break;
+      case 6:
+        answers.descripcionGeneral = content;
+        break;
     }
     session.step++;
     await message.reply({
@@ -152,8 +157,8 @@ export async function handleRegistrationMessage(
     return;
   }
 
-  // Step 6: file attachment
-  if (step === 6) {
+  // Step 7: file attachment
+  if (step === 7) {
     const attachment = message.attachments.first();
     if (!attachment) {
       await message.reply({
@@ -227,6 +232,11 @@ async function finishRegistration(
       {
         name: "❌ Suspendidos",
         value: answers.suspendidos ?? "N/A",
+        inline: false,
+      },
+      {
+        name: "📝 Descripción General",
+        value: (answers.descripcionGeneral ?? "N/A").slice(0, 1000),
         inline: false,
       },
     )

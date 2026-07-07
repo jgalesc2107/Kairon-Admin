@@ -16,13 +16,14 @@ import { execute as executeHistorial } from "../commands/historial.js";
 import { startRegistration } from "../handlers/registration.js";
 import {
   handlePromocionButton,
+  handlePromocionTypeSelect,
   handlePromocionSelect,
 } from "../handlers/promotion.js";
 import { EMBED_COLOR } from "../config.js";
 import { logger } from "../../lib/logger.js";
 
 function hasPermission(
-  interaction: ButtonInteraction | UserSelectMenuInteraction,
+  interaction: ButtonInteraction | UserSelectMenuInteraction | StringSelectMenuInteraction,
   flag: bigint,
 ): boolean {
   return interaction.memberPermissions?.has(flag) === true;
@@ -114,10 +115,10 @@ export async function onInteractionCreate(
       return;
     }
 
-    // User select menu (promotion)
+    // User select menu (promotion step 3)
     if (interaction.isUserSelectMenu()) {
       const i = interaction as UserSelectMenuInteraction;
-      if (i.customId === "select_promo_user") {
+      if (i.customId.startsWith("select_promo_user")) {
         if (!hasPermission(i, PermissionFlagsBits.ManageRoles)) {
           await i.update({
             embeds: [
@@ -134,10 +135,23 @@ export async function onInteractionCreate(
       return;
     }
 
-    // String select menu (delwarn)
+    // String select menus
     if (interaction.isStringSelectMenu()) {
       const i = interaction as StringSelectMenuInteraction;
-      if (i.customId.startsWith("delwarn_select_")) {
+      if (i.customId === "select_promo_type") {
+        if (!hasPermission(i, PermissionFlagsBits.ManageRoles)) {
+          await i.update({
+            embeds: [
+              new EmbedBuilder()
+                .setDescription("❌ No tienes permisos para usar esta función.")
+                .setColor(EMBED_COLOR),
+            ],
+            components: [],
+          });
+          return;
+        }
+        await handlePromocionTypeSelect(i);
+      } else if (i.customId.startsWith("delwarn_select_")) {
         await handleDelwarnSelect(i);
       }
       return;
