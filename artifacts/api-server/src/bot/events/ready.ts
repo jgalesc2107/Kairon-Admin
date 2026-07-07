@@ -3,6 +3,7 @@ import { data as warnData } from "../commands/warn.js";
 import { data as delwarnData } from "../commands/delwarn.js";
 import { data as historialData } from "../commands/historial.js";
 import { logger } from "../../lib/logger.js";
+import { GUILD_ID } from "../config.js";
 
 export async function onReady(client: Client): Promise<void> {
   logger.info({ tag: client.user?.tag }, "Discord bot ready");
@@ -18,10 +19,11 @@ export async function onReady(client: Client): Promise<void> {
   ];
 
   try {
-    await rest.put(Routes.applicationCommands(client.user.id), {
-      body: commands,
-    });
-    logger.info("Slash commands registered globally");
+    await rest.put(
+      Routes.applicationGuildCommands(client.user.id, GUILD_ID),
+      { body: commands }
+    );
+    logger.info({ guildId: GUILD_ID }, "Slash commands registered for guild");
   } catch (err) {
     logger.error({ err }, "Failed to register slash commands");
   }

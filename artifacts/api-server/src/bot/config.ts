@@ -23,3 +23,5 @@ export const WELCOME_BANNER_URL =
   "https://media.discordapp.net/attachments/1497222795111960636/1522049272869032169/Kairon_Group.png";
 
 export const PANEL_COMMAND = "¡KPanelG";
+
+export const GUILD_ID = "1493142716505264130";
