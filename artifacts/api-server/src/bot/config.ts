@@ -1,0 +1,25 @@
+export const EMBED_COLOR = 0x9c1f1f as const;
+
+export const CHANNELS = {
+  REGISTRO: "1495096536768708639",
+  PROMOCION: "1522063302803591288",
+  SANCIONES: "1495096918097793244",
+  BIENVENIDA: "1512573906958155866",
+} as const;
+
+export const PROMO_ROLES = {
+  ADD: [
+    "1495070255817425006",
+    "1495106100326830171",
+    "1495105901387059432",
+    "1495070258040406207",
+  ],
+  REMOVE: ["1495070256404627508"],
+} as const;
+
+export const THUMBNAIL_URL =
+  "https://media.discordapp.net/attachments/1497222795111960636/1522049188744007690/Sin_titulo.png";
+export const WELCOME_BANNER_URL =
+  "https://media.discordapp.net/attachments/1497222795111960636/1522049272869032169/Kairon_Group.png";
+
+export const PANEL_COMMAND = "¡KPanelG";
