@@ -3,6 +3,7 @@ import {
   SlashCommandBuilder,
   EmbedBuilder,
   TextChannel,
+  PermissionFlagsBits,
 } from "discord.js";
 import { CHANNELS, EMBED_COLOR } from "../config.js";
 import { addWarn } from "../storage.js";
@@ -11,6 +12,8 @@ import { logger } from "../../lib/logger.js";
 export const data = new SlashCommandBuilder()
   .setName("warn")
   .setDescription("Emite un warn a un usuario")
+  .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
+  .setDMPermission(false)
   .addUserOption((opt) =>
     opt
       .setName("usuario")
@@ -18,7 +21,11 @@ export const data = new SlashCommandBuilder()
       .setRequired(true),
   )
   .addStringOption((opt) =>
-    opt.setName("motivo").setDescription("Motivo del warn").setRequired(true),
+    opt
+      .setName("motivo")
+      .setDescription("Motivo del warn")
+      .setRequired(true)
+      .setMaxLength(500),
   );
 
 export async function execute(

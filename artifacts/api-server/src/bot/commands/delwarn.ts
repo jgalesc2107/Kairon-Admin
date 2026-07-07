@@ -6,13 +6,18 @@ import {
   StringSelectMenuBuilder,
   StringSelectMenuOptionBuilder,
   StringSelectMenuInteraction,
+  PermissionFlagsBits,
 } from "discord.js";
 import { EMBED_COLOR } from "../config.js";
 import { getUserWarns, deleteWarn } from "../storage.js";
 
+const MAX_SELECT_OPTIONS = 25;
+
 export const data = new SlashCommandBuilder()
   .setName("delwarn")
   .setDescription("Elimina un warn de un usuario")
+  .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
+  .setDMPermission(false)
   .addUserOption((opt) =>
     opt
       .setName("usuario")
@@ -38,7 +43,8 @@ export async function execute(
     return;
   }
 
-  const options = warns.map((w) => {
+  const displayWarns = warns.slice(-MAX_SELECT_OPTIONS); // keep most recent 25
+  const options = displayWarns.map((w) => {
     const label =
       w.reason.length > 50 ? w.reason.substring(0, 47) + "..." : w.reason;
     return new StringSelectMenuOptionBuilder()
@@ -46,6 +52,7 @@ export async function execute(
       .setLabel(label)
       .setDescription(`Fecha: ${w.date}`);
   });
+  const truncated = warns.length > MAX_SELECT_OPTIONS;
 
   const row = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(
     new StringSelectMenuBuilder()
@@ -59,7 +66,7 @@ export async function execute(
       new EmbedBuilder()
         .setTitle("🗑️ Eliminar Warn")
         .setDescription(
-          `Warns de <@${target.id}> **(${warns.length} total)**:\n\nSelecciona el warn que deseas eliminar.`,
+          `Warns de <@${target.id}> **(${warns.length} total)**${truncated ? ` — mostrando los últimos ${MAX_SELECT_OPTIONS}` : ""}:\n\nSelecciona el warn que deseas eliminar.`,
         )
         .setColor(EMBED_COLOR),
     ],

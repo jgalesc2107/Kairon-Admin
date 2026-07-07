@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { Message, PermissionFlagsBits } from "discord.js";
 import { PANEL_COMMAND } from "../config.js";
 import { buildPanelMessage } from "../handlers/panel.js";
 import {
@@ -15,8 +15,11 @@ export async function onMessageCreate(message: Message): Promise<void> {
     return;
   }
 
-  // Server text command
-  if (message.content === PANEL_COMMAND) {
+  // Server text command — only members with ManageGuild permission
+  if (message.content === PANEL_COMMAND && message.guild) {
+    const member = message.member;
+    const allowed = member?.permissions.has(PermissionFlagsBits.ManageGuild);
+    if (!allowed) return;
     if ("send" in message.channel) {
       await message.channel.send(buildPanelMessage());
     }

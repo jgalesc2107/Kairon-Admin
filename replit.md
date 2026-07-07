@@ -1,36 +1,46 @@
-# [Project name]
+# Kairon Systems Bot
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Bot de Discord para el servidor Kairon Group. Gestiona registros de eventos, ascensos, sanciones y bienvenidas.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
-- `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/api-server run dev` — arranca el servidor y el bot de Discord
+- `pnpm run typecheck` — typecheck completo
+- `pnpm run build` — typecheck + build
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
 - API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Bot: discord.js v14
+- Almacenamiento warns: JSON en `data/warns.json`
+
+## Funcionalidades del Bot
+
+### Panel (`¡KPanelG`)
+- Solo usuarios con permiso **Manage Guild** pueden enviarlo
+- Botón **Registro**: abre flujo por MD paso a paso; el resultado va al canal `1495096536768708639`
+- Botón **Promoción**: requiere permiso **Manage Roles**; muestra selector de usuario, añade roles Aspirante y retira el de no-miembro; resultado al canal `1522063302803591288`
+
+### Comandos Slash
+- `/warn [usuario] [motivo]` — emite warn, envía MD al sancionado y embed al canal `1495096918097793244`
+- `/delwarn [usuario]` — muestra los warns del usuario en un selector y permite eliminar uno
+- `/historial [usuario]` — muestra todos los warns del usuario (ephemeral)
+- Todos requieren permiso **Moderate Members**
+
+### Bienvenida automática
+- Cada nuevo miembro recibe mensaje en canal `1512573906958155866` + MD de bienvenida
+
+## Requisitos en el Portal de Discord
+
+- **Server Members Intent** → activado en Bot > Privileged Gateway Intents
+- **Message Content Intent** → activado en Bot > Privileged Gateway Intents
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
-
-## Architecture decisions
-
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
-
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Bot: `artifacts/api-server/src/bot/`
+- Configuración (IDs, color): `artifacts/api-server/src/bot/config.ts`
+- Almacenamiento warns: `data/warns.json` (creado automáticamente)
 
 ## User preferences
 
@@ -38,8 +48,6 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- Los slash commands globales tardan hasta 1 hora en propagarse por primera vez en Discord
+- El color de todos los embeds es `0x9C1F1F`
+- El bot necesita que el usuario tenga MDs habilitados para el flujo de registro
