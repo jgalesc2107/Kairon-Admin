@@ -158,12 +158,14 @@ export async function onInteractionCreate(
     }
   } catch (err) {
     logger.error({ err }, "Error handling interaction");
-    if (interaction.isRepliable() && !interaction.replied && !interaction.deferred) {
+    if (!interaction.isRepliable()) return;
+    if (interaction.deferred) {
       await interaction
-        .reply({
-          content: "❌ Ocurrió un error al procesar la interacción.",
-          ephemeral: true,
-        })
+        .editReply({ content: "❌ Ocurrió un error al procesar la interacción." })
+        .catch(() => {});
+    } else if (!interaction.replied) {
+      await interaction
+        .reply({ content: "❌ Ocurrió un error al procesar la interacción.", ephemeral: true })
         .catch(() => {});
     }
   }

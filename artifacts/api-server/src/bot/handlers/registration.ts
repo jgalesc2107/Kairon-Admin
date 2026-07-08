@@ -49,17 +49,21 @@ export async function startRegistration(
   client: Client,
 ): Promise<boolean> {
   if (sessions.has(userId)) {
-    const user = await client.users.fetch(userId);
-    const dm = await user.createDM();
-    await dm.send({
-      embeds: [
-        new EmbedBuilder()
-          .setDescription(
-            "⚠️ Ya tienes un registro en curso. Responde la pregunta pendiente en este chat o escribe `cancelar` para detenerlo.",
-          )
-          .setColor(EMBED_COLOR),
-      ],
-    });
+    try {
+      const user = await client.users.fetch(userId);
+      const dm = await user.createDM();
+      await dm.send({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription(
+              "⚠️ Ya tienes un registro en curso. Responde la pregunta pendiente en este chat o escribe `cancelar` para detenerlo.",
+            )
+            .setColor(EMBED_COLOR),
+        ],
+      });
+    } catch {
+      // MD desactivados — no es crítico
+    }
     return false;
   }
 

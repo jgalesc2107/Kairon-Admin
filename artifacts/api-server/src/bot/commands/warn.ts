@@ -6,7 +6,8 @@ import {
   PermissionFlagsBits,
 } from "discord.js";
 import { CHANNELS, EMBED_COLOR } from "../config.js";
-import { addWarn } from "../storage.js";
+import { addWarn, getUserWarns } from "../storage.js";
+import { applyAutoSanction } from "../handlers/autoSanction.js";
 import { logger } from "../../lib/logger.js";
 
 export const data = new SlashCommandBuilder()
@@ -40,6 +41,7 @@ export async function execute(
   });
 
   addWarn(target.id, motivo, interaction.user.id);
+  const totalWarns = getUserWarns(target.id).length;
 
   // DM to the sanctioned user
   try {
@@ -77,14 +79,57 @@ export async function execute(
     logger.error({ err }, "Error sending sanction embed to channel");
   }
 
+  // Responder al moderador primero (Discord requiere respuesta en <3s)
+  const isThreshold = [2, 4, 6, 8].includes(totalWarns);
+  const warnNote = isThreshold
+    ? `\n⚠️ **${totalWarns} warns acumulados** — aplicando sanción automática…`
+    : `\nTotal de warns: **${totalWarns}**.`;
+
   await interaction.reply({
     embeds: [
       new EmbedBuilder()
         .setDescription(
-          `✅ Warn emitido a <@${target.id}> por el motivo: **${motivo}**.`,
+          `✅ Warn emitido a <@${target.id}> por el motivo: **${motivo}**.${warnNote}`,
         )
         .setColor(EMBED_COLOR),
     ],
     ephemeral: true,
   });
+
+  // Sanción automática — actualizar la respuesta efímera con el resultado real
+  if (isThreshold) {
+    try {
+      const member = await interaction.guild?.members.fetch(target.id);
+      const sanctionDesc = member
+        ? await applyAutoSanction(member, totalWarns, interaction)
+        : null;
+
+      const resultNote = sanctionDesc
+        ? `\n✅ Sanción aplicada: ${sanctionDesc}`
+        : `\n❌ No se pudo aplicar la sanción automática (verifica permisos del bot).`;
+
+      await interaction.editReply({
+        embeds: [
+          new EmbedBuilder()
+            .setDescription(
+              `✅ Warn emitido a <@${target.id}> por el motivo: **${motivo}**.${resultNote}`,
+            )
+            .setColor(EMBED_COLOR),
+        ],
+      });
+    } catch (err) {
+      logger.error({ err }, "Error applying auto-sanction");
+      await interaction
+        .editReply({
+          embeds: [
+            new EmbedBuilder()
+              .setDescription(
+                `✅ Warn emitido a <@${target.id}>.\n❌ Error al aplicar la sanción automática.`,
+              )
+              .setColor(EMBED_COLOR),
+          ],
+        })
+        .catch(() => {});
+    }
+  }
 }
