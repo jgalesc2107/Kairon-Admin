@@ -27,6 +27,23 @@ export async function onMessageCreate(message: Message): Promise<void> {
     return;
   }
 
+  // ?redes — sends social media links embed
+  if (message.content === "?redes") {
+    const embed = new EmbedBuilder()
+      .setColor(EMBED_COLOR)
+      .setTitle("🌐 Redes de Kairon Group")
+      .setDescription(
+        [
+          "# Youtube <:yt:1520746929330323528>: [Link](https://www.youtube.com/@KaironGroup)",
+          "# TikTok <:tktk:1520746967590764684>: [Link](https://www.tiktok.com/@kairon.group)",
+          "# Discord <:discord:1520745880104468542>: [Link](https://discord.gg/SyWZUzYePe)",
+          "# Guns.lol <:web:1520747510233169971>: [Link](https://guns.lol/kairon_group)",
+        ].join("\n")
+      );
+    await message.channel.send({ embeds: [embed] });
+    return;
+  }
+
   // Server text command — only members with ManageGuild permission
   if (message.content === PANEL_COMMAND) {
     const member = message.member;
